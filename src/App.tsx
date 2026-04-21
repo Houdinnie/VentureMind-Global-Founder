@@ -50,7 +50,8 @@ import {
   FileText,
   ArrowLeftRight,
   Eye,
-  Download
+  Download,
+  Menu
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { auth, db } from './lib/firebase';
@@ -83,9 +84,9 @@ const SidebarItem = ({ icon: Icon, label, active, onClick }: { icon: any, label:
 );
 
 const MetricCard = ({ label, value, sublabel }: { label: string, value: string | number, sublabel?: string }) => (
-  <div className="bg-white/5 border border-white/10 p-8 rounded-xl backdrop-blur-sm group hover:border-amber-500/30 transition-all">
+  <div className="bg-white/5 border border-white/10 p-6 lg:p-8 rounded-xl backdrop-blur-sm group hover:border-amber-500/30 transition-all">
     <span className="col-header block mb-4">{label}</span>
-    <span className="text-4xl font-serif font-light tracking-tight">{value}</span>
+    <span className="text-3xl lg:text-4xl font-serif font-light tracking-tight">{value}</span>
     {sublabel && <span className="text-[10px] text-white/30 font-mono mt-3 block uppercase tracking-widest">{sublabel}</span>}
   </div>
 );
@@ -98,7 +99,7 @@ const ErrorAdvisory = ({ error, onClose }: { error: any, onClose: () => void }) 
       initial={{ opacity: 0, y: 50, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.9 }}
-      className="fixed bottom-12 right-12 z-50 w-[400px] bg-[#0c0505] border border-red-500/30 rounded-2xl p-6 backdrop-blur-xl shadow-2xl flex items-start gap-4 overflow-hidden"
+      className="fixed bottom-6 right-6 left-6 md:left-auto md:right-12 md:w-[400px] z-[100] bg-[#0c0505] border border-red-500/30 rounded-2xl p-6 backdrop-blur-xl shadow-2xl flex items-start gap-4 overflow-hidden"
     >
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500/50 via-amber-500/50 to-red-500/50" />
       <div className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0">
@@ -197,27 +198,27 @@ const ComparisonModal = ({ src, target, onClose }: { src: any, target: any, onCl
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
     exit={{ opacity: 0 }}
-    className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md flex items-center justify-center p-8"
+    className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 lg:p-8"
   >
     <motion.div 
       initial={{ scale: 0.9, y: 20 }}
       animate={{ scale: 1, y: 0 }}
-      className="bg-[#0A0A0A] border border-white/10 rounded-[32px] w-full max-w-4xl overflow-hidden shadow-2xl"
+      className="bg-[#0A0A0A] border border-white/10 rounded-[24px] lg:rounded-[32px] w-full max-w-4xl overflow-hidden shadow-2xl max-h-[90vh] flex flex-col"
     >
-      <div className="px-10 py-8 border-b border-white/5 flex justify-between items-center">
+      <div className="px-6 lg:px-10 py-6 lg:py-8 border-b border-white/5 flex justify-between items-center shrink-0">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
             <ArrowLeftRight size={18} className="text-amber-500" />
           </div>
-          <h3 className="text-2xl font-serif">Jurisdiction Matchup</h3>
+          <h3 className="text-xl lg:text-2xl font-serif">Jurisdiction Matchup</h3>
         </div>
         <button onClick={onClose} className="text-white/20 hover:text-white transition-colors">
           <X size={24} />
         </button>
       </div>
 
-      <div className="p-10 grid grid-cols-3 gap-8">
-        <div className="space-y-8">
+      <div className="p-6 lg:p-10 grid grid-cols-2 lg:grid-cols-3 gap-8 overflow-y-auto custom-scrollbar flex-1">
+        <div className="hidden lg:block space-y-8">
           <div className="h-20 flex flex-col justify-end">
             <span className="text-[10px] uppercase tracking-widest text-white/20 font-bold mb-2">Metric</span>
           </div>
@@ -229,12 +230,13 @@ const ComparisonModal = ({ src, target, onClose }: { src: any, target: any, onCl
         </div>
 
         <div className="space-y-8 bg-white/[0.02] p-6 rounded-2xl border border-white/5 relative">
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-black px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest">Active Choice</div>
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-black px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest whitespace-nowrap">Active Choice</div>
           <div className="h-20 flex flex-col justify-end">
             <h4 className="text-2xl font-serif text-amber-500">{src.name}</h4>
           </div>
           {[src.cat, src.tax, src.governance, src.speed].map((v, i) => (
-            <div key={i} className="h-12 flex items-center text-sm font-serif">
+            <div key={i} className="h-12 flex flex-col lg:flex-row lg:items-center text-sm font-serif">
+              <span className="lg:hidden text-[8px] uppercase text-white/20 font-mono mb-1">{['Nexus', 'Tax', 'Law', 'Speed'][i]}</span>
               {v}
             </div>
           ))}
@@ -245,19 +247,95 @@ const ComparisonModal = ({ src, target, onClose }: { src: any, target: any, onCl
             <h4 className="text-2xl font-serif text-white/60">{target.name}</h4>
           </div>
           {[target.cat, target.tax, target.governance, target.speed].map((v, i) => (
-            <div key={i} className="h-12 flex items-center text-sm font-serif text-white/40">
+            <div key={i} className="h-12 flex flex-col lg:flex-row lg:items-center text-sm font-serif text-white/40">
+              <span className="lg:hidden text-[8px] uppercase text-white/10 font-mono mb-1">{['Nexus', 'Tax', 'Law', 'Speed'][i]}</span>
               {v}
             </div>
           ))}
         </div>
       </div>
 
-      <div className="px-10 py-8 bg-white/[0.02] border-t border-white/5 flex justify-end">
+      <div className="px-6 lg:px-10 py-6 lg:py-8 bg-white/[0.02] border-t border-white/5 flex justify-end shrink-0">
         <button 
           onClick={onClose}
-          className="px-8 py-3 bg-white text-black rounded-xl font-bold uppercase text-[10px] tracking-widest hover:bg-amber-500 hover:text-white transition-all"
+          className="w-full lg:w-auto px-8 py-3 bg-white text-black rounded-xl font-bold uppercase text-[10px] tracking-widest hover:bg-amber-500 hover:text-white transition-all shadow-xl"
         >
           Close Analysis
+        </button>
+      </div>
+    </motion.div>
+  </motion.div>
+);
+
+const LegalPolicyModal = ({ onClose }: { onClose: () => void }) => (
+  <motion.div 
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 lg:p-8"
+  >
+    <motion.div 
+      initial={{ scale: 0.95, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      className="bg-[#050505] border border-white/10 rounded-[32px] w-full max-w-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,1)] relative flex flex-col max-h-[85vh]"
+    >
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
+      
+      <div className="px-8 lg:px-12 py-8 lg:py-10 border-b border-white/5 flex justify-between items-center shrink-0">
+        <div className="space-y-1">
+          <span className="text-amber-500 text-[10px] font-mono tracking-[0.4em] uppercase block">Legal Protocol VM-01</span>
+          <h3 className="text-2xl lg:text-3xl font-serif font-light">Global Terms & Disclaimers</h3>
+        </div>
+        <button onClick={onClose} className="p-2 text-white/20 hover:text-white transition-colors bg-white/5 rounded-full">
+          <X size={20} />
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-8 lg:p-12 space-y-12 custom-scrollbar">
+        <section className="space-y-4">
+          <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40 border-l-2 border-amber-500 pl-4">1. Neural Swarm Disclaimer</h4>
+          <p className="text-sm font-serif italic text-white/70 leading-relaxed">
+            The VentureMind Global Founder OS utilizes high-autonomy Neural Swarms to simulate legal and fiscal architectures. 
+            <strong> These agents are not professional legal counsel, and their outputs do not constitute legal or financial advice.</strong> 
+            All suggestions must be audited by qualified professionals in the respective jurisdictions (Wyoming, Estonia, Singapore, etc.).
+          </p>
+        </section>
+
+        <section className="space-y-4">
+          <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40 border-l-2 border-white/20 pl-4">2. Developer Liability Protection</h4>
+          <div className="space-y-2 text-xs font-mono text-white/40 leading-relaxed uppercase tracking-wider">
+            <p className="border-b border-white/5 pb-2">• THE DEVELOPERS OF VENTUREMIND DISCLAIM ALL LIABILITY FOR FINANCIAL LOSS.</p>
+            <p className="border-b border-white/5 pb-2">• ALL OPERATIONS CONDUCTED VIA THE MANTRA INTERFACE ARE AS-IS.</p>
+            <p className="border-b border-white/5 pb-2">• USER INDEMNIFIES DEVELOPERS AGAINST ALL THIRD-PARTY CLAIMS.</p>
+            <p>• NO FIDUCIARY DUTY IS CREATED BY AUTHENTICATION TO THIS OS.</p>
+          </div>
+        </section>
+
+        <section className="space-y-4">
+          <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40 border-l-2 border-white/20 pl-4">3. Data Residency & Encryption</h4>
+          <p className="text-sm font-serif italic text-white/70 leading-relaxed">
+            VentureMind employs e-Residency nexus protocols for EU-data compliance. While communication is encrypted, 
+            the user acknowledges the recursive nature of AI simulations and agrees to the ingestion of provided data 
+            for the sole purpose of operational simulation and automation routing.
+          </p>
+        </section>
+
+        <section className="space-y-4">
+          <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40 border-l-2 border-white/20 pl-4">4. Intellectual Property Isolation</h4>
+          <p className="text-sm font-serif italic text-white/70 leading-relaxed">
+            All code blocks, formation notes, and jurisdictional blueprints generated by the system are licensed 
+            to the user for internal use only. The underlying Mantra Intelligence Kernel remains the exclusive 
+            intellectual property of the VentureMind Core Developers.
+          </p>
+        </section>
+      </div>
+
+      <div className="p-8 lg:p-12 border-t border-white/5 bg-white/[0.02] shrink-0">
+        <button 
+          onClick={onClose}
+          className="w-full bg-white text-black py-4 rounded-2xl font-bold uppercase tracking-[0.3em] text-[10px] hover:bg-amber-500 hover:text-white transition-all shadow-2xl"
+        >
+          Acknowledge & Seal Protocol
         </button>
       </div>
     </motion.div>
@@ -462,33 +540,33 @@ const EntityFormationWizard = ({ onComplete, onCancel, userProfile, onError }: {
   };
 
   return (
-    <div className="bg-[#050505] border border-white/10 rounded-[32px] overflow-hidden shadow-2xl max-w-2xl mx-auto relative">
-      <div className="h-1 bg-white/5 w-full">
+    <div className="bg-[#050505] border border-white/10 rounded-[24px] lg:rounded-[32px] overflow-hidden shadow-2xl w-full max-w-2xl mx-auto relative flex flex-col max-h-[90vh]">
+      <div className="h-1 bg-white/5 w-full shrink-0">
         <motion.div 
           initial={{ width: 0 }}
           animate={{ width: `${(step / steps.length) * 100}%` }}
           className="h-full bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)] transition-all duration-500"
         />
       </div>
-      <div className="px-8 py-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
-        <div className="flex gap-4">
+      <div className="px-6 lg:px-8 py-5 lg:py-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02] shrink-0">
+        <div className="flex gap-2 lg:gap-4 overflow-x-auto no-scrollbar">
           {steps.map((s) => (
-            <div key={s.id} className="flex items-center gap-2">
+            <div key={s.id} className="flex items-center gap-2 shrink-0">
               <div className={cn(
                 "w-6 h-6 rounded-full text-[10px] flex items-center justify-center font-bold border transition-all",
-                step >= s.id ? "bg-amber-500 border-amber-500 text-black" : "bg-white/5 border-white/10 text-white/20"
-              )}>{s.id}</div>
+                step >= s.id ? "bg-amber-500 border-amber-500 text-black shadow-[0_0_10px_rgba(245,158,11,0.3)]" : "bg-white/5 border-white/10 text-white/20"
+              )}>{step > s.id ? <CheckCircle2 size={10} /> : s.id}</div>
               <span className={cn(
-                "hidden md:block text-[10px] uppercase tracking-widest font-bold",
-                step >= s.id ? "text-white" : "text-white/20"
+                "hidden sm:block text-[9px] lg:text-[10px] uppercase tracking-widest font-bold",
+                step === s.id ? "text-white" : "text-white/20"
               )}>{s.title}</span>
             </div>
           ))}
         </div>
-        <button onClick={onCancel} className="text-white/20 hover:text-white"><LogOut size={16} /></button>
+        <button onClick={onCancel} className="text-white/20 hover:text-white p-2 -mr-2"><X size={18} /></button>
       </div>
 
-      <div className="p-12 space-y-8">
+      <div className="flex-1 overflow-y-auto p-6 lg:p-12 space-y-8 custom-scrollbar">
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
@@ -645,7 +723,7 @@ const EntityFormationWizard = ({ onComplete, onCancel, userProfile, onError }: {
                       {isConsulting && swarmType === 'jurisdiction' ? "Auditing Suitability..." : "Neural Suitability Audit"}
                     </button>
                   </div>
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
                     {['USD', 'EUR', 'GBP', 'SGD', 'KYD', 'CHF', 'JPY', 'CAD'].map(cur => (
                       <button 
                         key={cur}
@@ -1023,7 +1101,7 @@ const EntityFormationWizard = ({ onComplete, onCancel, userProfile, onError }: {
           {errors.notes && <p className="text-[10px] text-red-500 font-mono uppercase tracking-wider">{errors.notes}</p>}
         </div>
 
-        <div className="pt-8 flex justify-between gap-4">
+        <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between gap-4">
           {step > 1 && (
             <button 
               onClick={() => setStep(step - 1)}
@@ -1069,24 +1147,24 @@ const DashboardView = ({ entities, credits, visas, onNewClick }: { entities: Leg
       </div>
 
       <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-sm shadow-2xl">
-        <div className="grid grid-cols-4 px-8 py-4 bg-white/[0.03] border-b border-white/10">
+        <div className="hidden md:grid grid-cols-4 px-8 py-4 bg-white/[0.03] border-b border-white/10">
           <span className="col-header">Entity Identification</span>
           <span className="col-header">Status / Audit</span>
           <span className="col-header">Architecture</span>
           <span className="col-header text-right">Operational Status</span>
         </div>
         {entities.length === 0 ? (
-          <div className="p-20 text-center text-white/20 italic font-serif">No autonomous entities detected in current vector.</div>
+          <div className="p-12 md:p-20 text-center text-white/20 italic font-serif text-sm">No autonomous entities detected in current vector.</div>
         ) : (
           entities.map(entity => (
-            <div key={entity.id} className="data-row grid-cols-4 px-8 py-6 group">
+            <div key={entity.id} className="data-row flex flex-col md:grid md:grid md:grid-cols-4 px-6 md:px-8 py-6 gap-4 md:gap-0 group border-b border-white/5 md:border-none last:border-none">
               <div className="flex flex-col">
                 <span className="font-serif text-lg group-hover:text-amber-200 transition-colors uppercase tracking-tight">{entity.name}</span>
                 <span className="data-value text-[10px] text-white/30 uppercase tracking-widest">{entity.jurisdiction}</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className={cn(
-                  "p-2 rounded-lg border",
+                  "p-2 rounded-lg border shrink-0",
                   entity.kycStatus === 'passed' ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500" : "bg-amber-500/10 border-amber-500/20 text-amber-500"
                 )}>
                   <ShieldCheck size={14} />
@@ -1103,8 +1181,11 @@ const DashboardView = ({ entities, credits, visas, onNewClick }: { entities: Leg
                   </div>
                 </div>
               </div>
-              <span className="text-[10px] uppercase tracking-[0.2em] text-white/40">{entity.type}</span>
-              <div className="flex justify-end items-center">
+              <div className="flex items-center md:items-start flex-row md:flex-col gap-2 md:gap-0">
+                <span className="md:hidden text-[8px] uppercase tracking-widest text-white/20 font-bold">Type:</span>
+                <span className="text-[10px] uppercase tracking-[0.2em] text-white/40">{entity.type}</span>
+              </div>
+              <div className="flex justify-start md:justify-end items-center">
                 <span className={cn(
                   "px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest border",
                   entity.status === 'active' 
@@ -1295,7 +1376,7 @@ const ComplianceDashboardView = ({ entities, visas }: { entities: LegalEntity[],
 
   return (
     <div className="space-y-12">
-      <div className="flex justify-between items-end border-b border-white/10 pb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-white/10 pb-4 gap-6">
         <div className="space-y-2">
           <span className="text-amber-500 text-[10px] font-mono tracking-[0.4em] uppercase">System Health Monitoring</span>
           <h2 className="font-serif italic text-3xl font-light text-white">Compliance Dashboard</h2>
@@ -1473,21 +1554,21 @@ const AddFundingRoundModal = ({ entities, userProfile, onComplete, onCancel, onE
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-6 pb-24 md:pb-6">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 lg:p-6 pb-24 md:pb-6">
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onCancel}
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/90 lg:bg-black/80 backdrop-blur-sm"
       />
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-xl bg-[#050505] border border-white/10 rounded-[32px] overflow-hidden shadow-2xl flex flex-col"
+        className="relative w-full max-w-xl bg-[#050505] border border-white/10 rounded-3xl lg:rounded-[32px] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
       >
-        <div className="px-8 py-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+        <div className="px-6 lg:px-8 py-5 lg:py-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
           <div className="space-y-1">
             <span className="text-amber-500 text-[9px] font-mono tracking-[0.4em] uppercase">Equity Entry</span>
             <h3 className="text-xl font-serif italic font-light">Register Funding Event</h3>
@@ -1497,8 +1578,8 @@ const AddFundingRoundModal = ({ entities, userProfile, onComplete, onCancel, onE
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-8 space-y-6 overflow-y-auto max-h-[70vh]">
-          <div className="grid grid-cols-2 gap-6">
+        <form onSubmit={handleSubmit} className="p-6 lg:p-8 space-y-6 overflow-y-auto custom-scrollbar">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-[9px] uppercase font-bold text-white/40 tracking-widest">Legal Entity</label>
               <select 
@@ -1521,7 +1602,7 @@ const AddFundingRoundModal = ({ entities, userProfile, onComplete, onCancel, onE
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-[9px] uppercase font-bold text-white/40 tracking-widest">Closing Date</label>
               <input 
@@ -1610,7 +1691,7 @@ const CapitalDashboardView = ({ rounds, entities, userProfile, onError }: { roun
   };
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-12 pb-12 lg:pb-0">
       <AnimatePresence>
         {addingRound && (
           <AddFundingRoundModal 
@@ -1623,12 +1704,12 @@ const CapitalDashboardView = ({ rounds, entities, userProfile, onError }: { roun
         )}
       </AnimatePresence>
 
-      <div className="flex justify-between items-end border-b border-white/10 pb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-white/10 pb-4 gap-6">
         <div className="space-y-2">
           <span className="text-amber-500 text-[10px] font-mono tracking-[0.4em] uppercase">Equity & Capitalization</span>
-          <h2 className="font-serif italic text-3xl font-light text-white">Capital History</h2>
+          <h2 className="font-serif italic text-3xl lg:text-3xl font-light text-white">Capital History</h2>
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex flex-wrap items-center gap-4 lg:gap-6">
           <button 
             onClick={() => setAddingRound(true)}
             className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-amber-500 hover:text-white transition-colors"
@@ -1656,27 +1737,36 @@ const CapitalDashboardView = ({ rounds, entities, userProfile, onError }: { roun
         <section className="space-y-6">
           <h3 className="col-header uppercase tracking-wider">Funding Rounds</h3>
           <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
-            <div className="grid grid-cols-[1fr_120px_150px_150px_200px] px-8 py-4 bg-white/[0.03] border-b border-white/10">
+            <div className="hidden md:grid grid-cols-[1fr_120px_150px_150px_200px] px-8 py-4 bg-white/[0.03] border-b border-white/10">
               <span className="col-header">Round</span>
               <span className="col-header">Date</span>
               <span className="col-header">Amount</span>
-              <span className="col-header">Valuation</span>
+              <span className="col-header italic">Valuation</span>
               <span className="col-header">Investors</span>
             </div>
             {rounds.length === 0 ? (
-              <div className="p-20 text-center text-white/20 italic font-serif">Registry is empty. No funding events recorded.</div>
+              <div className="p-12 lg:p-20 text-center text-white/20 italic font-serif text-sm">Registry is empty. No funding events recorded.</div>
             ) : (
               rounds.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(round => (
-                <div key={round.id} className="grid grid-cols-[1fr_120px_150px_150px_200px] px-8 py-6 items-center group hover:bg-white/[0.02] transition-colors">
+                <div key={round.id} className="flex flex-col md:grid md:grid-cols-[1fr_120px_150px_150px_200px] px-6 lg:px-8 py-6 items-start md:items-center group hover:bg-white/[0.02] transition-colors border-b border-white/5 md:border-none last:border-none gap-4 md:gap-0">
                   <div className="flex flex-col">
                     <span className="font-serif text-lg group-hover:text-amber-200 transition-colors uppercase tracking-tight">{round.roundName}</span>
                     <span className="text-[10px] text-white/30 uppercase tracking-widest">
                       {entities.find(e => e.id === round.entityId)?.name || 'Unknown Entity'}
                     </span>
                   </div>
-                  <span className="data-value text-xs text-white/60">{new Date(round.date).toLocaleDateString()}</span>
-                  <span className="font-mono text-sm text-emerald-500">${(round.amount / 1000).toLocaleString()}K</span>
-                  <span className="font-mono text-sm text-white/80">${(round.postMoneyValuation / 1000000).toFixed(1)}M</span>
+                  <div className="flex items-center md:items-start flex-row md:flex-col gap-2 md:gap-0">
+                    <span className="md:hidden text-[8px] uppercase tracking-widest text-white/20 font-bold">Date:</span>
+                    <span className="data-value text-xs text-white/60">{new Date(round.date).toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex items-center md:items-start flex-row md:flex-col gap-2 md:gap-0">
+                    <span className="md:hidden text-[8px] uppercase tracking-widest text-white/20 font-bold">Amount:</span>
+                    <span className="font-mono text-sm text-emerald-500">${(round.amount / 1000).toLocaleString()}K</span>
+                  </div>
+                  <div className="flex items-center md:items-start flex-row md:flex-col gap-2 md:gap-0">
+                    <span className="md:hidden text-[8px] uppercase tracking-widest text-white/20 font-bold">Valuation:</span>
+                    <span className="font-mono text-sm text-white/80">${(round.postMoneyValuation / 1000000).toFixed(1)}M</span>
+                  </div>
                   <div className="flex flex-wrap gap-1">
                     {round.investors.map((inv, idx) => (
                       <span key={idx} className="bg-white/5 border border-white/10 px-2 py-0.5 rounded text-[9px] uppercase tracking-wider text-white/40">
@@ -2268,10 +2358,10 @@ const MantraEngineView = ({ userProfile, initialPrompt, onError }: { userProfile
                     </div>
 
                     {/* Neural Flow Chart Visualization */}
-                    <div className="pt-4 border-t border-white/5">
-                      <div className="flex justify-between items-center mb-6">
+                    <div className="pt-4 border-t border-white/5 overflow-hidden">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                         <span className="text-[9px] uppercase font-bold tracking-[0.2em] text-white/30">Neural Execution Flow</span>
-                        <div className="flex gap-4">
+                        <div className="flex flex-wrap gap-4">
                           <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-white/10" />
                             <span className="text-[8px] uppercase tracking-widest text-white/20">Pending</span>
@@ -2287,7 +2377,7 @@ const MantraEngineView = ({ userProfile, initialPrompt, onError }: { userProfile
                         </div>
                       </div>
 
-                      <div className="flex items-start gap-3 overflow-x-auto no-scrollbar pb-4">
+                      <div className="flex items-start gap-3 overflow-x-auto no-scrollbar pb-6 lg:pb-4 touch-pan-x">
                         {swarmTasks.map((t, idx) => {
                           const isNextPending = idx < swarmTasks.length - 1 && (swarmTasks[idx+1].status === 'pending' || swarmTasks[idx+1].status === 'processing');
                           const isCurrentActive = t.status === 'processing';
@@ -2624,6 +2714,8 @@ export default function App() {
   const [mantraPrompt, setMantraPrompt] = useState('');
   const [activeTab, setActiveTab] = useState<'dash' | 'entities' | 'mantra' | 'billing' | 'nomad' | 'compliance' | 'wizard' | 'capital' | 'neural' | 'tax' | 'personas'>('neural');
   const [appError, setAppError] = useState<any>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
 
   const handleError = (error: any, context: string) => {
     logError(error, context);
@@ -2712,8 +2804,8 @@ export default function App() {
   );
 
   if (!currentUser) return (
-    <div className="h-screen w-screen flex bg-[#050505] text-white overflow-hidden p-8">
-      <div className="flex-1 relative flex flex-col justify-between p-12 border border-white/10 rounded-3xl overflow-hidden">
+    <div className="min-h-screen w-full flex flex-col lg:flex-row bg-[#050505] text-white overflow-x-hidden p-4 lg:p-8">
+      <div className="flex-1 relative flex flex-col justify-between p-8 lg:p-12 border border-white/10 rounded-3xl overflow-hidden min-h-[500px]">
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,rgba(245,158,11,0.1)_0%,transparent_70%)]" />
         
         <div className="relative z-10 flex items-center gap-3">
@@ -2721,9 +2813,9 @@ export default function App() {
           <span className="font-serif italic text-2xl tracking-tight">VentureMind</span>
         </div>
 
-        <div className="relative z-10 space-y-8">
+        <div className="relative z-10 space-y-8 py-12 lg:py-0">
           <span className="text-amber-500 text-[11px] font-mono tracking-[0.4em] uppercase block">Analysis Stage: Core Architecture</span>
-          <h1 className="text-[140px] font-serif leading-[0.8] tracking-tighter mix-blend-difference font-light">
+          <h1 className="text-6xl md:text-8xl lg:text-[140px] font-serif leading-[0.8] tracking-tighter mix-blend-difference font-light">
             Global <br /> <span className="italic">Founder</span> OS
           </h1>
           <p className="text-white/40 max-w-sm text-sm leading-relaxed font-light">
@@ -2743,10 +2835,10 @@ export default function App() {
         </div>
       </div>
 
-      <div className="w-[500px] flex flex-col justify-center items-center px-16">
+      <div className="w-full lg:w-[500px] flex flex-col justify-center items-center px-6 lg:px-16 py-12 lg:py-0">
         <div className="w-full space-y-12">
-          <div className="space-y-4">
-            <h3 className="font-serif text-5xl font-light">Join the Swarm</h3>
+          <div className="space-y-4 text-center lg:text-left">
+            <h3 className="font-serif text-4xl lg:text-5xl font-light">Join the Swarm</h3>
             <p className="text-white/40 text-sm leading-relaxed">Secure biometric or cryptographic authentication required to access the Mantra Neural Interface.</p>
           </div>
           
@@ -2766,15 +2858,21 @@ export default function App() {
   );
 
   return (
-    <div className="h-screen flex bg-[#050505] p-4 text-white overflow-hidden">
-      <div className="flex-1 flex flex-col bg-[#050505] border border-white/10 rounded-[32px] overflow-hidden shadow-2xl">
-        <nav className="h-20 border-b border-white/5 px-10 flex items-center justify-between backdrop-blur-md">
-          <div className="flex items-center gap-12">
+    <div className="min-h-screen flex bg-[#050505] p-2 lg:p-4 text-white overflow-x-hidden">
+      <div className="flex-1 flex flex-col bg-[#050505] border border-white/10 rounded-[24px] lg:rounded-[32px] overflow-hidden shadow-2xl relative">
+        <nav className="h-20 border-b border-white/5 px-4 lg:px-10 flex items-center justify-between backdrop-blur-md relative z-50">
+          <div className="flex items-center gap-4 lg:gap-12">
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2 text-white/40 hover:text-white transition-colors"
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('dash')}>
               <div className="w-8 h-8 bg-gradient-to-tr from-amber-600 to-amber-200 rounded-full shadow-[0_0_20px_rgba(245,158,11,0.2)]" />
-              <span className="font-serif italic text-xl tracking-tight">VentureMind</span>
+              <span className="font-serif italic text-xl lg:text-xl tracking-tight hidden sm:block">VentureMind</span>
             </div>
-            <div className="flex gap-8 text-[10px] uppercase tracking-[0.3em] font-medium text-white/30">
+            <div className="hidden lg:flex gap-8 text-[10px] uppercase tracking-[0.3em] font-medium text-white/30">
               <span 
                 onClick={() => setActiveTab('neural')}
                 className={cn("cursor-pointer transition-colors flex items-center gap-2", activeTab === 'neural' ? "text-white" : "hover:text-white")}
@@ -2806,76 +2904,119 @@ export default function App() {
                 onClick={() => setActiveTab('personas')}
                 className={cn("cursor-pointer transition-colors", activeTab === 'personas' ? "text-white" : "hover:text-white")}
               >Personas</span>
-              <span className="hover:text-white transition-colors cursor-pointer">Deployment</span>
             </div>
           </div>
-          <div className="flex items-center gap-8">
-            <div className="bg-white/5 px-6 py-2 rounded-full border border-white/10 flex items-center gap-3">
+          <div className="flex items-center gap-4 lg:gap-8">
+            <div className="hidden md:flex bg-white/5 px-6 py-2 rounded-full border border-white/10 items-center gap-3">
               <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
               <span className="text-[10px] font-mono tracking-[0.2em] text-white/80">{(profile?.credits || 0).toLocaleString()} CREDITS</span>
             </div>
-            <div className="flex items-center gap-4 pl-4 border-l border-white/10">
-              <button className="text-white/30 hover:text-white transition-colors"><Settings size={18} /></button>
+            <div className="flex items-center gap-2 lg:gap-4 pl-0 lg:pl-4 border-l-0 lg:border-l border-white/10">
+              <button 
+                onClick={() => setShowPrivacy(true)}
+                className="hidden sm:block text-white/30 hover:text-white transition-colors"
+                title="Legal & Protocol Settings"
+              >
+                <Settings size={18} />
+              </button>
               <button onClick={handleLogout} className="text-white/30 hover:text-white transition-colors"><LogOut size={18} /></button>
             </div>
           </div>
         </nav>
 
-        <div className="flex-1 flex overflow-hidden">
-          <aside className="w-72 border-r border-white/5 p-8 flex flex-col gap-10">
-            <div>
-              <h3 className="text-[9px] uppercase tracking-[0.4em] text-white/20 mb-6 font-bold">Active Project</h3>
-              <div className="bg-gradient-to-br from-white/[0.08] to-transparent p-5 rounded-2xl border border-white/10 group cursor-default">
-                <p className="font-serif text-base group-hover:text-amber-200 transition-colors">Global Founder OS</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="w-1 h-1 rounded-full bg-amber-500" />
-                  <p className="text-[9px] text-white/30 uppercase tracking-widest italic">Ingested via TRD.v4</p>
+        <div className="flex-1 flex overflow-hidden relative">
+          <AnimatePresence>
+            {(mobileMenuOpen || window.innerWidth >= 1024) && (
+              <motion.aside 
+                initial={{ x: -300, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -300, opacity: 0 }}
+                className={cn(
+                  "absolute lg:relative z-40 w-72 h-full border-r border-white/5 p-8 flex flex-col gap-10 bg-[#050505]/95 backdrop-blur-xl lg:bg-transparent lg:backdrop-blur-none transition-all",
+                  !mobileMenuOpen && "hidden lg:flex"
+                )}
+              >
+                <div>
+                  <h3 className="text-[9px] uppercase tracking-[0.4em] text-white/20 mb-6 font-bold">Active Project</h3>
+                  <div className="bg-gradient-to-br from-white/[0.08] to-transparent p-5 rounded-2xl border border-white/10 group cursor-default">
+                    <p className="font-serif text-base group-hover:text-amber-200 transition-colors">Global Founder OS</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="w-1 h-1 rounded-full bg-amber-500" />
+                      <p className="text-[9px] text-white/30 uppercase tracking-widest italic">Ingested via TRD.v4</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            <nav className="space-y-2 -mx-2">
-              <h3 className="text-[9px] uppercase tracking-[0.4em] text-white/20 mb-4 px-4 font-bold">Persona Swarm</h3>
-              <div className="space-y-1">
-                <div className="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 transition-all group cursor-pointer border border-amber-500/10 bg-amber-500/5 shadow-[0_0_15px_rgba(245,158,11,0.05)]" onClick={() => setActiveTab('neural')}>
-                  <div className="w-1 h-8 bg-amber-500 rounded-full animate-pulse" />
-                  <div className="flex flex-col">
-                    <span className="text-sm font-serif text-amber-500">Neural Ingestion</span>
-                    <span className="text-[9px] text-amber-500/50 uppercase tracking-widest mt-0.5">Mantra Intelligence</span>
+                <nav className="space-y-2 -mx-2">
+                  <h3 className="text-[9px] uppercase tracking-[0.4em] text-white/20 mb-4 px-4 font-bold">Persona Swarm</h3>
+                  <div className="space-y-1">
+                    <div className={cn(
+                      "flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 transition-all group cursor-pointer",
+                      activeTab === 'neural' ? "border border-amber-500/20 bg-amber-500/5 shadow-[0_0_15px_rgba(245,158,11,0.05)]" : ""
+                    )} onClick={() => { setActiveTab('neural'); setMobileMenuOpen(false); }}>
+                      <div className={cn("w-1 h-8 rounded-full transition-all", activeTab === 'neural' ? "bg-amber-500 animate-pulse" : "bg-white/10 group-hover:bg-amber-500/50")} />
+                      <div className="flex flex-col">
+                        <span className={cn("text-sm font-serif", activeTab === 'neural' ? "text-amber-500" : "text-white/80")}>Neural Ingestion</span>
+                        <span className="text-[9px] text-amber-500/50 uppercase tracking-widest mt-0.5">Mantra Intelligence</span>
+                      </div>
+                    </div>
+                    {['nomad', 'tax', 'wizard'].map(tab => (
+                      <div key={tab} className={cn(
+                        "flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 transition-all group cursor-pointer",
+                        activeTab === tab ? "border border-white/10 bg-white/5 shadow-[0_0_15px_rgba(255,255,255,0.02)]" : ""
+                      )} onClick={() => { setActiveTab(tab as any); setMobileMenuOpen(false); }}>
+                        <div className={cn("w-1 h-8 rounded-full transition-all", activeTab === tab ? "bg-amber-500" : "bg-white/10 group-hover:bg-amber-500/50")} />
+                        <div className="flex flex-col">
+                          <span className={cn("text-sm font-serif", activeTab === tab ? "text-white" : "text-white/80")}>
+                            {tab === 'nomad' ? 'Nomad Concierge' : tab === 'tax' ? 'Tax Strategist' : 'Entity Lawyer'}
+                          </span>
+                          <span className="text-[9px] text-white/30 uppercase tracking-widest mt-0.5">
+                            {tab === 'nomad' ? 'RPM Persona C9' : tab === 'tax' ? 'RPM Persona A1' : 'RPM Persona L4'}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
-                <div className="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 transition-all group cursor-pointer" onClick={() => setActiveTab('nomad')}>
-                  <div className="w-1 h-8 bg-white/20 rounded-full group-hover:bg-amber-500 transition-colors" />
-                  <div className="flex flex-col">
-                    <span className="text-sm font-serif">Nomad Concierge</span>
-                    <span className="text-[9px] text-white/30 uppercase tracking-widest mt-0.5">RPM Persona C9</span>
+                </nav>
+                <div className="mt-auto pt-8 border-t border-white/5 space-y-4">
+                  <div className="md:hidden">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-[9px] uppercase tracking-widest text-white/20">Credits</span>
+                      <span className="text-[10px] font-mono text-emerald-500">{(profile?.credits || 0).toLocaleString()}</span>
+                    </div>
                   </div>
-                </div>
-                <div className={cn(
-                  "flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 transition-all group cursor-pointer",
-                  activeTab === 'tax' && "bg-white/5 border border-white/10"
-                )} onClick={() => setActiveTab('tax')}>
-                  <div className={cn(
-                    "w-1 h-8 rounded-full transition-colors",
-                    activeTab === 'tax' ? "bg-amber-500" : "bg-amber-800 group-hover:bg-amber-600"
-                  )} />
-                  <div className="flex flex-col">
-                    <span className={cn("text-sm font-serif", activeTab === 'tax' ? "text-white" : "text-white/80")}>Tax Strategist</span>
-                    <span className="text-[9px] text-white/30 uppercase tracking-widest mt-0.5">RPM Persona A1</span>
+                  
+                  <button 
+                    onClick={() => { setShowPrivacy(true); setMobileMenuOpen(false); }}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-[9px] uppercase tracking-[0.3em] font-bold text-white/20 hover:text-white transition-colors group text-left"
+                  >
+                    <ShieldCheck size={12} className="text-white/10 group-hover:text-amber-500 transition-colors" />
+                    Privacy & Terms
+                  </button>
+                  
+                  <div className="px-4">
+                    <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-[8px] font-mono text-white/20">SYSTEM LOG</span>
+                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                      </div>
+                      <p className="text-[7px] text-white/10 leading-relaxed uppercase tracking-tighter">
+                        VentureMind Kernel v4.28 // Neural Nexus Active // Secured via End-to-End Encryption
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 transition-all group cursor-pointer" onClick={() => setActiveTab('wizard')}>
-                  <div className="w-1 h-8 bg-amber-500 rounded-full" />
-                  <div className="flex flex-col">
-                    <span className="text-sm font-serif">Entity Lawyer</span>
-                    <span className="text-[9px] text-white/30 uppercase tracking-widest mt-0.5">RPM Persona L4</span>
-                  </div>
-                </div>
-              </div>
-            </nav>
-          </aside>
 
-          <main className="flex-1 overflow-auto bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.02)_0%,transparent_100%)] p-12">
+                  <div className="md:hidden">
+                    <button onClick={handleLogout} className="w-full py-3 bg-red-500/10 text-red-500 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">
+                      Secure Termination
+                    </button>
+                  </div>
+                </div>
+              </motion.aside>
+            )}
+          </AnimatePresence>
+
+          <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.02)_0%,transparent_100%)] p-4 lg:p-12 scroll-smooth no-scrollbar">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
@@ -2908,13 +3049,19 @@ export default function App() {
           </main>
         </div>
 
-        <footer className="h-10 border-t border-white/5 bg-white/[0.01] px-10 flex items-center justify-between text-[9px] text-white/20 tracking-[0.2em] font-mono">
-          <div className="flex gap-8 uppercase">
+        <footer className="h-10 border-t border-white/5 bg-white/[0.01] px-4 lg:px-10 flex items-center justify-between text-[9px] text-white/20 tracking-[0.2em] font-mono shrink-0">
+          <div className="flex gap-4 lg:gap-8 uppercase overflow-x-auto no-scrollbar whitespace-nowrap">
             <span>Session: 0xFF14_VMA</span>
-            <span>Model: Mantra-70B-Turbo</span>
-            <span>Location: Cloud-Orch-US-East</span>
+            <span className="hidden md:inline">Model: Mantra-70B-Turbo</span>
+            <span className="hidden lg:inline">Location: Cloud-Orch-US-East</span>
+            <button 
+              onClick={() => setShowPrivacy(true)}
+              className="hover:text-amber-500 transition-colors border-l border-white/10 pl-4 lg:pl-8 ml-4 lg:ml-8"
+            >
+              Privacy & Protocol Terms
+            </button>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <div className="w-1 h-1 bg-amber-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]"></div>
             <span className="uppercase tracking-widest text-amber-500/60 transition-opacity">System Listening</span>
           </div>
@@ -2922,6 +3069,7 @@ export default function App() {
       </div>
       <AnimatePresence>
         {appError && <ErrorAdvisory error={appError} onClose={() => setAppError(null)} />}
+        {showPrivacy && <LegalPolicyModal onClose={() => setShowPrivacy(false)} />}
       </AnimatePresence>
     </div>
   );
