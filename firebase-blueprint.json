@@ -1,0 +1,126 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Founder profile and global residency status",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "residency": { "type": "string", "description": "Current tax residency country" },
+        "credits": { "type": "number", "description": "Balance for Mantra Engine" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "credits"]
+    },
+    "Entity": {
+      "title": "Legal Entity",
+      "description": "Company registration and compliance data",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "name": { "type": "string" },
+        "jurisdiction": { "type": "string" },
+        "type": { "type": "string", "enum": ["LLC", "Ltd", "Inc", "Foundation"] },
+        "status": { "type": "string", "enum": ["active", "pending", "dissolved"] },
+        "complianceScore": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "ownerId", "name", "jurisdiction"]
+    },
+    "Swarm": {
+      "title": "Mantra Swarm",
+      "description": "AI agent execution instance",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "prompt": { "type": "string" },
+        "status": { "type": "string", "enum": ["queued", "running", "completed", "failed"] },
+        "cost": { "type": "number" },
+        "agentPersonas": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "ownerId", "prompt", "status"]
+    },
+    "Task": {
+      "title": "Agent Task",
+      "description": "Individual step inside a swarm",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "swarmId": { "type": "string" },
+        "persona": { "type": "string" },
+        "description": { "type": "string" },
+        "result": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "done"] }
+      },
+      "required": ["id", "swarmId", "persona", "status"]
+    },
+    "Visa": {
+      "title": "Nomad Visa",
+      "description": "Global mobility and visa status tracking",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "country": { "type": "string" },
+        "visaType": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "expiring", "expired", "pending", "none"] },
+        "expiryDate": { "type": "string", "format": "date" },
+        "complianceScore": { "type": "number" },
+        "remoteWorkAllowed": { "type": "boolean" }
+      },
+      "required": ["id", "ownerId", "country", "status"]
+    },
+    "FundingRound": {
+      "title": "Funding Round",
+      "description": "Capital injection and valuation event",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "entityId": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "roundName": { "type": "string", "enum": ["Pre-Seed", "Seed", "Series A", "Series B", "Bridge"] },
+        "amount": { "type": "number" },
+        "postMoneyValuation": { "type": "number" },
+        "investors": { "type": "array", "items": { "type": "string" } },
+        "date": { "type": "string", "format": "date" }
+      },
+      "required": ["id", "entityId", "ownerId", "roundName", "amount", "postMoneyValuation"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Primary user document"
+    },
+    "/visas/{visaId}": {
+      "schema": "Visa",
+      "description": "Nomadic visa tracking data"
+    },
+    "/fundingRounds/{roundId}": {
+      "schema": "FundingRound",
+      "description": "Capital history records"
+    },
+    "/entities/{entityId}": {
+      "schema": "Entity",
+      "description": "Global entity formation data"
+    },
+    "/swarms/{swarmId}": {
+      "schema": "Swarm",
+      "description": "AI software builder execution"
+    },
+    "/swarms/{swarmId}/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "Granular agent steps"
+    },
+    "/admins/{adminId}": {
+      "schema": { "type": "object", "properties": { "uid": { "type": "string" } } },
+      "description": "Admin access control"
+    }
+  }
+}

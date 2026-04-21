@@ -1,0 +1,127 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 0.1 Helpers
+    function isSignedIn() { return request.auth != null; }
+    function isEmailVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
+    function isAdmin() { return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+
+    // 1. Users
+    match /users/{userId} {
+      function isValidUser(data) {
+        return data.uid == request.auth.uid
+          && data.email is string && data.email.size() <= 100
+          && data.credits is number
+          && (!('residency' in data) || (data.residency is string && data.residency.size() <= 64));
+      }
+      
+      allow get: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isEmailVerified() && isValidUser(incoming()) && incoming().credits == 0;
+      allow update: if isOwner(userId) && isValidUser(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'residency'])
+      ) || isAdmin();
+    }
+
+    // 1.1 Visas
+    match /visas/{visaId} {
+      function isValidVisa(data) {
+        return data.ownerId == request.auth.uid
+          && data.country is string && data.country.size() <= 64
+          && data.status in ['active', 'expiring', 'expired', 'pending', 'none'];
+      }
+
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow get: if isSignedIn() && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow create: if isEmailVerified() && isValidVisa(incoming()) && isValidId(visaId);
+      allow update: if isSignedIn() && (
+        (resource.data.ownerId == request.auth.uid && isValidVisa(incoming()) && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'expiryDate', 'complianceScore', 'remoteWorkAllowed']))
+        || isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // 1.2 Funding Rounds
+    match /fundingRounds/{roundId} {
+      function isValidRound(data) {
+        return data.ownerId == request.auth.uid
+          && data.entityId is string && data.entityId.size() <= 128
+          && data.amount is number
+          && data.postMoneyValuation is number;
+      }
+
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow get: if isSignedIn() && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow create: if isEmailVerified() && isValidRound(incoming()) && isValidId(roundId);
+      allow update: if isAdmin(); // Financial history is generally immutable for users
+      allow delete: if isAdmin();
+    }
+
+    // 2. Entities
+    match /entities/{entityId} {
+      function isValidEntity(data) {
+        return data.ownerId == request.auth.uid
+          && data.name is string && data.name.size() <= 128
+          && data.jurisdiction is string && data.jurisdiction.size() <= 64
+          && data.type in ['LLC', 'Ltd', 'Inc', 'Foundation']
+          && data.status in ['active', 'pending', 'dissolved'];
+      }
+
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow get: if isSignedIn() && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow create: if isEmailVerified() && isValidEntity(incoming()) && isValidId(entityId);
+      allow update: if isSignedIn() && (
+        (resource.data.ownerId == request.auth.uid && isValidEntity(incoming()) && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'status']))
+        || isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // 3. Swarms
+    match /swarms/{swarmId} {
+      function isValidSwarm(data) {
+        return data.ownerId == request.auth.uid
+          && data.prompt is string && data.prompt.size() <= 1000
+          && data.status in ['queued', 'running', 'completed', 'failed']
+          && data.cost is number;
+      }
+
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow get: if isSignedIn() && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow create: if isEmailVerified() && isValidSwarm(incoming()) && isValidId(swarmId);
+      allow update: if isSignedIn() && (
+        (resource.data.ownerId == request.auth.uid && isValidSwarm(incoming()) && incoming().diff(existing()).affectedKeys().hasOnly(['status']))
+        || isAdmin()
+      );
+    }
+
+    // 4. Tasks (Subcollection)
+    match /swarms/{swarmId}/tasks/{taskId} {
+      function isValidTask(data) {
+        return data.swarmId == swarmId
+          && data.persona is string && data.persona.size() <= 64
+          && data.status in ['pending', 'done'];
+      }
+
+      // Master Gate: Derive access from parent swarm
+      function canAccessSwarm(sId) {
+        return get(/databases/$(database)/documents/swarms/$(sId)).data.ownerId == request.auth.uid;
+      }
+
+      allow list, get: if isSignedIn() && (canAccessSwarm(swarmId) || isAdmin());
+      allow create: if isEmailVerified() && canAccessSwarm(swarmId) && isValidTask(incoming()) && isValidId(taskId);
+      allow update: if isSignedIn() && (
+        (canAccessSwarm(swarmId) && isValidTask(incoming()) && incoming().diff(existing()).affectedKeys().hasOnly(['result', 'status']))
+        || isAdmin()
+      );
+    }
+  }
+}
